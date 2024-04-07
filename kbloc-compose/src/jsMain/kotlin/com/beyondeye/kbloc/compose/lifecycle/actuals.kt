@@ -11,7 +11,7 @@ import kotlin.coroutines.CoroutineContext
  * todo no lifecycle events to handle in js?
  */
 @Composable
-actual fun <T : R, R> Flow<T>.mp_collectAsStateWithLifecycle(
+public actual fun <T : R, R> Flow<T>.mp_collectAsStateWithLifecycle(
     initial: R,
     context: CoroutineContext
 ): State<R> = collectAsState(initial,context)

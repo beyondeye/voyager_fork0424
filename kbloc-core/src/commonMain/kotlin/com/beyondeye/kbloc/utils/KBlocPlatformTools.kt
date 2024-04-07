@@ -5,7 +5,9 @@ package com.beyondeye.kbloc.utils
  */
 import kotlin.reflect.KClass
 
+/*
 public expect object KBlocPlatformTools {
     public fun getClassName(kClass: KClass<*>): String
     public fun <K, V> safeHashMap(): MutableMap<K, V>
 }
+ */

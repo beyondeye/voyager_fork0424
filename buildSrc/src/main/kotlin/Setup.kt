@@ -74,6 +74,7 @@ fun Project.setupModuleForComposeMultiplatform(
     iosPrefixName: String = "ios" // only used in ios sample
 ) {
     plugins.withType<org.jetbrains.kotlin.gradle.plugin.KotlinBasePluginWrapper> {
+        task("testClasses") //*DARIO* *HACK* see https://stackoverflow.com/questions/36465824/android-studio-task-testclasses-not-found-in-project
         extensions.configure<KotlinMultiplatformExtension> {
             if (withKotlinExplicitMode) {
                 explicitApi()

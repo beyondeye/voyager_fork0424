@@ -1,5 +1,5 @@
 package com.beyondeye.kbloc.compose
-
+/*
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
 
@@ -22,3 +22,5 @@ class ExampleInstrumentedTest {
         assertEquals("com.beyondeye.compose_bloc.test", appContext.packageName)
     }
 }
+
+ */

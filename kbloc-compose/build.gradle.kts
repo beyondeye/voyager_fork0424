@@ -38,6 +38,7 @@ kotlin {
 //            dependencies {
 //                implementation(compose.runtime)
 //                implementation(compose.ui)
+//                implementation(libs.junit)
 ////                testImplementation("junit:junit:${Versions.junit_version}")
 ////                testImplementation ("org.assertj:assertj-core:${Versions.assertj_version}")
 ////                androidTestImplementation("androidx.test.ext:junit:1.1.3")
