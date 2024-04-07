@@ -44,7 +44,7 @@ kotlin {
                 //see https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-test/index.html
                 //sse https://developer.android.com/kotlin/coroutines/test#testdispatchers
                 implementation(libs.coroutines.test)
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0-RC.2")
             }
         }
         val androidMain by getting
