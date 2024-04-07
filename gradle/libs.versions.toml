@@ -23,6 +23,10 @@ composeRuntime = "1.5.0"
 composeUI = "1.5.0"
 rxjava = "3.1.5"
 
+kotlinxCollectionsImmutable = "0.3.7"
+mockkCommon = "1.12.4"
+kotlinxDatetime = "0.6.0-RC.2"
+
 junit = "5.10.0"
 
 multiplatformUuid = "0.8.2"
@@ -60,6 +64,10 @@ compose-material = { module = "androidx.compose.material:material", version.ref 
 compose-materialIcons = { module = "androidx.compose.material:material-icons-core", version.ref = "composeMaterial" }
 compose-activity = { module = "androidx.activity:activity-compose", version.ref = "composeActivity" }
 rxjava = { module = "io.reactivex.rxjava3:rxjava", version.ref = "rxjava" }
+
+kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutable" }
+mockk-common = { module = "io.mockk:mockk-common", version.ref = "mockkCommon" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 
 multiplatformUuid = { module = "com.benasher44:uuid", version.ref = "multiplatformUuid" }
 
