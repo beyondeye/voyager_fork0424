@@ -7,3 +7,4 @@
 .gradle
 *.iml
 *.focus
+/kbloc-core/build/
