@@ -2,8 +2,8 @@ plugins {
     kotlin("multiplatform")
 //    kotlin("native.cocoapods")
     id("com.android.library")
-    id("com.vanniktech.maven.publish")
     id("org.jetbrains.compose")
+    id("com.vanniktech.maven.publish")
     id("kotlinx-atomicfu")
 }
 
@@ -30,9 +30,10 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(libs.coroutines.core)
-                implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.7")
+                api(projects.voyagerCore)
                 compileOnly(compose.runtime)
+                implementation(libs.coroutines.core)
+                implementation(libs.kotlinx.collections.immutable)
 //                implementation(Deps.AtomicFu.common)
             }
         }
@@ -40,11 +41,11 @@ kotlin {
             dependencies {
                 implementation(kotlin("test"))
                 //https://github.com/mockk/mockk/releases
-                implementation ("io.mockk:mockk-common:1.12.4")
+                implementation (libs.mockk.common)
                 //see https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-test/index.html
                 //sse https://developer.android.com/kotlin/coroutines/test#testdispatchers
                 implementation(libs.coroutines.test)
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0-RC.2")
+                implementation(libs.kotlinx.datetime)
             }
         }
         val androidMain by getting
@@ -81,6 +82,12 @@ kotlin {
         val jsMain by getting {
         }
         val jsTest by getting {
+        }
+
+        val commonWebMain by getting {
+            dependencies {
+                implementation(libs.multiplatformUuid)
+            }
         }
     }
 }

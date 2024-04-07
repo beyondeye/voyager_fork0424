@@ -18,5 +18,6 @@ include(
     ":voyager-koin",
     ":voyager-rxjava",
     ":voyager-livedata",
-    ":kbloc-core"
+    ":kbloc-core",
+    ":kbloc-compose"
 )
