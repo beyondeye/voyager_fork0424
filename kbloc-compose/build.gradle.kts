@@ -1,4 +1,3 @@
-import org.jetbrains.compose.compose
 
 plugins {
     kotlin("multiplatform")
@@ -18,6 +17,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api(projects.kblocCore)
+                api(projects.voyagerNavigator)
                 implementation(libs.coroutines.core)
                 implementation(libs.kotlinx.collections.immutable)
                 compileOnly(compose.runtime)
