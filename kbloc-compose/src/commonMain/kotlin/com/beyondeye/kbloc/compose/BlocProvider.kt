@@ -90,7 +90,7 @@ public inline fun <reified BlocA: BlocBase<*>> BlocProvider(
  */
 @Composable
 public inline fun <reified BlocA: BlocBase<*>>
-        rememberProvidedBlocOf(blocTag:String?=null):BlocA?
+        rememberProvidedBloc(blocTag:String?=null):BlocA?
 {
     val curBindings=LocalBlocBindings.current
     val store = LocalBlocStoreOwner.current.blocStore
