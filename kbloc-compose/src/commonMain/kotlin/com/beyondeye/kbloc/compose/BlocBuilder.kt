@@ -61,7 +61,7 @@ public inline fun <reified BlocA:BlocBase<BlocAState>,BlocAState:Any> BlocBuilde
     noinline buildWhen: BlocBuilderCondition<BlocAState>?=null,
     content:@Composable (BlocAState)->Unit)
 {
-    rememberProvidedBlocOf<BlocA>(blocTag)?.let { b->
+    rememberProvidedBloc<BlocA>(blocTag)?.let { b->
         BlockBuilderCore(b, buildWhen, content)
     }
 
@@ -71,7 +71,7 @@ public inline fun <reified BlocA:BlocBase<BlocAState>,BlocAState:Any> BlocBuilde
  * same as previous method but with explicitely specified bloc instance [externallyProvidedBlock]
  * not retrieved implicitely from current registered blocs in the current composable subtree
  * see [BlocProvider]
- * Use this method if for example you have retrieved the Bloc already with [rememberProvidedBlocOf]
+ * Use this method if for example you have retrieved the Bloc already with [rememberProvidedBloc]
  */
 @Composable
 public inline fun <reified BlocA:BlocBase<BlocAState>,BlocAState:Any> BlocBuilder(

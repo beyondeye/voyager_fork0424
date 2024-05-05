@@ -17,7 +17,7 @@ import kotlinx.coroutines.CoroutineScope
 /**
  *  [BlocProvider] is a composable which provides a [Bloc] to its child composable [content] and
  *  all the associated composable tree.
- *  The bloc can be retrieved  by calls to [rememberProvidedBlocOf]
+ *  The bloc can be retrieved  by calls to [rememberProvidedBloc]
  *  It is used as a dependency injection (DI) configuration so that a single instance
  *  of a [Bloc] can be provided to multiple child composables within a subtree.
  *  BlocProvider is defined as an extension method of [Screen] because the lifecycle of the provided [Bloc]
