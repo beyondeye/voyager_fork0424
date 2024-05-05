@@ -24,6 +24,15 @@ public fun Screen.MultiBlocProvider():_BlocProviderList {
 }
 
 /**
+ * same as [MultiBlocProvider]
+ */
+@Composable
+public fun Screen.BlocProviders():_BlocProviderList {
+    return _BlocProviderList(this)
+}
+
+
+/**
  * [blist] is a list of triples (Bloc:BlocBase<*>,bloc_tag:String,bloc_key:String)
  */
 public class _BlocProviderList(public val screen: Screen, public val blist:MutableList<Triple<BlocBase<*>,String,String>> = mutableListOf()) {
