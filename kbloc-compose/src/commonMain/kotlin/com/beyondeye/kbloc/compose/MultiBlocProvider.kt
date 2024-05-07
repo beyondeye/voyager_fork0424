@@ -46,9 +46,19 @@ public class _BlocProviderList(public val screen: Screen, public val blist:Mutab
         blist.add(Triple(b,blocTag?:"",bkey))
         return this
     }
+
+    /**
+     * separate method for most common use case without tag
+     */
     @Composable
-    public inline fun <reified BlocA: BlocBase<*>> BlocProvider(
-        blocTag: String? = null,
+    public inline fun <reified BlocA: BlocBase<*>> BlocProviderExt(
+        externallyProvidedBlock:BlocA,
+    ): _BlocProviderList {
+        return BlocProviderExtForTag(null,externallyProvidedBlock)
+    }
+    @Composable
+    public inline fun <reified BlocA: BlocBase<*>> BlocProviderExtForTag(
+        blocTag: String?,
         externallyProvidedBlock:BlocA,
     ): _BlocProviderList {
         val b= remember { externallyProvidedBlock }

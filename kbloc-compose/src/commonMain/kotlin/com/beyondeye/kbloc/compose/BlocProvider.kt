@@ -39,16 +39,28 @@ import kotlinx.coroutines.CoroutineScope
  *         bloc lazily. There is currently no such option in this implementation
  */
 @Composable
-public inline fun <reified BlocA: BlocBase<*>> Screen.BlocProvider(
-    blocTag: String? = null,
+public inline fun <reified BlocA: BlocBase<*>> Screen.BlocProviderForTag(
+    blocTag: String?,
     crossinline create: @DisallowComposableCalls (cscope: CoroutineScope) -> BlocA,
     crossinline content:@Composable ()->Unit)
 {
     val (b,bkey)=rememberBloc(blocTag,create)
-
     BindBloc(b,blocTag,bkey) {
         content()
     }
+}
+
+/**
+ * separate method for the most common case where no tag is provided. see [BlocProviderForTag]
+ * we have a separate method because otherwise kotlin syntax requires that we  specify blocTag even if we define for it
+ * a default value of null
+ */
+@Composable
+public inline fun <reified BlocA : BlocBase<*>> Screen.BlocProvider(
+    crossinline create: @DisallowComposableCalls (cscope: CoroutineScope) -> BlocA,
+    crossinline content: @Composable () -> Unit
+) {
+    BlocProviderForTag<BlocA>(null, create, content)
 }
 
 
@@ -61,8 +73,8 @@ public inline fun <reified BlocA: BlocBase<*>> Screen.BlocProvider(
  * NOTE: in flutter_bloc this method was called BlocProvider.value
  */
 @Composable
-public inline fun <reified BlocA: BlocBase<*>> BlocProvider(
-    blocTag: String? = null,
+public inline fun <reified BlocA: BlocBase<*>> BlocProviderExtForTag(
+    blocTag: String?,
     externallyProvidedBlock:BlocA,
     crossinline content:@Composable ()->Unit)
 {
@@ -72,6 +84,21 @@ public inline fun <reified BlocA: BlocBase<*>> BlocProvider(
         content()
     }
 }
+
+/**
+ * separate method for the most common case where no tag is provided. see [BlocProviderExtForTag]
+ * we have a separate method because otherwise kotlin syntax requires that we  specify blocTag even if we define for it
+ * a default value of null
+ *
+ */
+@Composable
+public inline fun <reified BlocA: BlocBase<*>> BlocProviderExt(
+    externallyProvidedBlock:BlocA,
+    crossinline content:@Composable ()->Unit)
+{
+    BlocProviderExtForTag(null,externallyProvidedBlock,content)
+}
+
 
 /**
  * Use this method to obtain a bloc that was previously configured with [BlocProvider]
