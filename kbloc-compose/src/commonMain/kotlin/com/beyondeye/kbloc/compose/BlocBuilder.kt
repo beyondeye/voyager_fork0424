@@ -54,6 +54,7 @@ internal fun <BlocAState>buildWhenFilter(srcFlow:Flow<BlocAState>, buildWhen: Bl
  * the [BlocBuilder] was initialized.
  * NOTE that if [buildWhen] condition change after initial composition the change
  * will not be taken into account
+ *  * WARNING: NEED TO SPECIFY TEMPLATE PARAMETERS (BlocA type parameter) EXPLICITLY OTHERWISE BLOC WILL NOT BE RESOLVED!!
  */
 @Composable
 public inline fun <reified BlocA:BlocBase<BlocAState>,BlocAState:Any> BlocBuilder(
@@ -68,10 +69,19 @@ public inline fun <reified BlocA:BlocBase<BlocAState>,BlocAState:Any> BlocBuilde
 }
 
 /**
+ * return the stream of state changes of the bloc converted to ComposeState
+ */
+@Composable
+public  fun <BlocA:BlocBase<BlocAState>,BlocAState:Any> BlocA.stateC(): State<BlocAState> {
+        return this.stream.mp_collectAsStateWithLifecycle(this.state)
+}
+
+/**
  * same as previous method but with explicitely specified bloc instance [externallyProvidedBlock]
  * not retrieved implicitely from current registered blocs in the current composable subtree
  * see [BlocProvider]
  * Use this method if for example you have retrieved the Bloc already with [rememberProvidedBloc]
+ * WARNING: NEED TO SPECIFY TEMPLATE PARAMETERS (BlocA type parameter) EXPLICITLY OTHERWISE BLOC WILL NOT BE RESOLVED!!
  */
 @Composable
 public inline fun <reified BlocA:BlocBase<BlocAState>,BlocAState:Any> BlocBuilder(
