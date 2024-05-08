@@ -72,7 +72,7 @@ public inline fun <reified BlocA:BlocBase<BlocAState>,BlocAState:Any> BlocBuilde
  * return the stream of state changes of the bloc converted to ComposeState
  */
 @Composable
-public  fun <BlocA:BlocBase<BlocAState>,BlocAState:Any> BlocA.stateC(): State<BlocAState> {
+public  fun <BlocA:BlocBase<BlocAState>,BlocAState:Any> BlocA.collectAsState(): State<BlocAState> {
         return this.stream.mp_collectAsStateWithLifecycle(this.state)
 }
 
