@@ -18,7 +18,7 @@ public interface DeferredStateFlow<out T> : StateFlow<T> {
 
 /**
  * a [MutableStateFlow] where the state cannot be updated directly by writing to it, but instead by calling
- * [queueStateUpdate] method
+ * [emitQ] method
  */
 public class MutableDeferredStateFlow<S:Any>(initialValue:S,
                                   public val cscope_stateUpdate: CoroutineScope):DeferredStateFlow<S> {
@@ -31,10 +31,10 @@ public class MutableDeferredStateFlow<S:Any>(initialValue:S,
      * the updates are processed in the order that they are queued
      * this is also apparently the behavior of StreamController<State>.broadcast() used in the dart version of bloc
      * @return a [Deferred] with the value of the updated state
-     * TODO: another mechanism that could be potentially used instead of [queueStateUpdate] is [MutableStateFlow.updateAndGet]
+     * TODO: another mechanism that could be potentially used instead of [emitQ] is [MutableStateFlow.updateAndGet]
      * https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/update-and-get.html
      */
-    public fun queueStateUpdate( updatefn:suspend (S)->S, useRefEqualityCheck:Boolean=true):Deferred<S> {
+    public fun emitQ(updatefn:suspend (S)->S, useRefEqualityCheck:Boolean=true):Deferred<S> {
         val curdeferred=_deferredState
         _deferredState=cscope_stateUpdate.async {
             val curState=curdeferred.await()
@@ -64,7 +64,7 @@ public class MutableDeferredStateFlow<S:Any>(initialValue:S,
         get() = _deferredState
 
     /**
-     * this the current value of the flow. if a [queueStateUpdate] operation was started, this
+     * this the current value of the flow. if a [emitQ] operation was started, this
      * value is stale (not up-to-date). better always read the current value using [valueDeferred]
      */
     override val value: S

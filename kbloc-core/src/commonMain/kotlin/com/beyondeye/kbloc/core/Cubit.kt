@@ -22,7 +22,7 @@ import kotlinx.coroutines.CoroutineScope
  */
 public abstract class Cubit<State:Any>(
     /**
-     * the coroutine scope used for running async state update function (queueStateUpdate)
+     * the coroutine scope used for running async state update function (emitQ)
      * and suspend functions in event handlers
      */
     cscope: CoroutineScope,

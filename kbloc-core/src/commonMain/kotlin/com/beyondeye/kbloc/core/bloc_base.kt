@@ -54,18 +54,19 @@ public interface StateStreamableSource<State> : StateStreamable<State>, Closable
 public interface Emittable<State : Any?> {
     /**
      * Emits a new [state].
-     * NOTE: don't use this method for asynchronous state updates, use instead [queueStateUpdate]
+     * NOTE: don't use this method for asynchronous state updates, use instead [emitQ]
      */
     public fun emit(state: State)
 
     /**
      * use this method if you need update the state from an async method.
-     * usinq [queueStateUpdate] will garantee that multiple async state updates will be
+     * usinq [emitQ] will garantee that multiple async state updates will be
      * executed in the same order as they were queued
      * THIS METHOD IS NOT PRESENT IN THE ORIGINAL dart bloc implementation
      * @return deferred of the updated stated
      */
-    public fun queueStateUpdate(stateUpdateFun: suspend (curState: State) -> State): Deferred<State>
+    //
+    public fun emitQ(stateUpdateFun: suspend (curState: State) -> State): Deferred<State>
 }
 
 /**
@@ -88,12 +89,12 @@ public interface ErrorSink : Closable {
  */
 public abstract class BlocBase<State : Any>// ignore: invalid_use_of_protected_member
 /**
- * the coroutine scope used for running async state update function (queueStateUpdate)
+ * the coroutine scope used for running async state update function (emitQ)
  * and suspend functions in event handlers
  */ public constructor(
     initialState: State,
     /**
-     * the coroutine scope used for running async state update function (queueStateUpdate)
+     * the coroutine scope used for running async state update function (emitQ)
      * and suspend functions in event handlers
      */
     public val cscope: CoroutineScope, useReferenceEqualityForStateChanges: Boolean
@@ -136,9 +137,10 @@ public abstract class BlocBase<State : Any>// ignore: invalid_use_of_protected_m
      *  as it is the first thing emitted by the instance.
      *
      *  * Throws a [StateError] if the bloc is closed.
-     *  *DARIO* avoid using [emit] and use instead [queueStateUpdate] that avoid race conditions between
+     *  *DARIO* avoid using [emit] and use instead [emitQ] that avoid race conditions between
      *          multiple parallel state updates
      */
+    //
     override fun emit(state: State) {
         cscope.async {
             try {
@@ -147,7 +149,7 @@ public abstract class BlocBase<State : Any>// ignore: invalid_use_of_protected_m
                 }
                 //TODO: using equal here is expensive: perhaps remove it?
                 val curStateDeferred = _stateController.valueDeferred
-                val updatedState = _stateController.queueStateUpdate(
+                val updatedState = _stateController.emitQ(
                     { state },
                     _useReferenceEqualityForStateChanges
                 ).await()
@@ -167,7 +169,7 @@ public abstract class BlocBase<State : Any>// ignore: invalid_use_of_protected_m
         }
     }
 
-    override fun queueStateUpdate(stateUpdateFun: suspend (curState: State) -> State): Deferred<State> {
+    override fun emitQ(stateUpdateFun: suspend (curState: State) -> State): Deferred<State> {
         return cscope.async {
             //note that exceptions thrown here will not bubble up unless the call await() on the returned Deferred object
             val updatedState: State
@@ -177,7 +179,7 @@ public abstract class BlocBase<State : Any>// ignore: invalid_use_of_protected_m
                 }
                 //TODO: using equal here is expensive: perhaps remove it?
                 val curStateDeferred = _stateController.valueDeferred
-                updatedState = _stateController.queueStateUpdate(
+                updatedState = _stateController.emitQ(
                     stateUpdateFun,
                     _useReferenceEqualityForStateChanges
                 ).await()

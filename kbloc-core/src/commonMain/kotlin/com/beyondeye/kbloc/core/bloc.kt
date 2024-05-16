@@ -65,7 +65,7 @@ public typealias EventHandler<Event,State> = suspend (event:Event,emit:Emitter<S
 public abstract class Bloc<Event : Any, State : Any>
  public constructor(
     /**
-     * the coroutine scope used for running async state update function (queueStateUpdate)
+     * the coroutine scope used for running async state update function (emitQ)
      * and suspend functions in event handlers
      */
     cscope: CoroutineScope, initialState: State,
@@ -302,7 +302,7 @@ public abstract class Bloc<Event : Any, State : Any>
      *   package com.beyondeye.kbloc.concurrency for an opinionated set of event transformers.
      *
      */
-    //todo rewrite this method using queuestateupdate and deferredstate
+    //todo rewrite this method using emitQ and deferredstate
     public inline fun <reified E:Event>  on(noinline transformer:EventTransformer<E>?=null,noinline handler:EventHandler<E,State>) {
         val eventType = E::class
         val handlerExists = _handlers.find { it.type == eventType } != null
