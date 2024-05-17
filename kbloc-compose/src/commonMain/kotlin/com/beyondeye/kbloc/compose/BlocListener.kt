@@ -70,7 +70,7 @@ public inline fun <reified BlocA : BlocBase<BlocAState>, BlocAState : Any> BlocL
     noinline listenWhen: BlocListenerCondition<BlocAState>? = null,
     crossinline listener: @DisallowComposableCalls suspend (BlocAState) -> Unit
 ) {
-    rememberProvidedBloc<BlocA>(blocTag)?.let { b ->
+    rememberBlocProvided<BlocA>(blocTag)?.let { b ->
         BlocListenerCore(b, listenWhen, listener)
     }
 }
@@ -80,7 +80,7 @@ public inline fun <reified BlocA : BlocBase<BlocAState>, BlocAState : Any> BlocL
  * same as previous method but with explicitely specified bloc instance [externallyProvidedBlock]
  * not retrieved implicitely from current registered blocs in the current composable subtree
  * see [BlocProvider]
- * Use this method if for example you have retrieved the Bloc already with [rememberProvidedBloc]
+ * Use this method if for example you have retrieved the Bloc already with [rememberBlocProvided]
  */
 @Composable
 public inline fun <reified BlocA : BlocBase<BlocAState>, BlocAState : Any> BlocListener(

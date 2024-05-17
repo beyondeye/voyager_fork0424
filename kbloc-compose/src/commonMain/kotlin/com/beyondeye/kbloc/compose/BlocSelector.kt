@@ -37,7 +37,7 @@ public inline fun <reified BlocA: BlocBase<BlocAState>,BlocAState:Any,BlockSelec
     crossinline selectorFn: @DisallowComposableCalls (BlocAState)->BlockSelectedState,
     content:@Composable (BlockSelectedState)->Unit)
 {
-    rememberProvidedBloc<BlocA>(blocTag)?.let { b->
+    rememberBlocProvided<BlocA>(blocTag)?.let { b->
         BlocSelectorForSelectorFn(b, selectorFn, content)
     }
 }
@@ -51,7 +51,7 @@ public inline fun <reified BlocA: BlocBase<BlocAState>,BlocAState:Any,BlockSelec
     selector: AbstractSelector<BlocAState, BlockSelectedState>,
     content:@Composable (BlockSelectedState)->Unit)
 {
-    rememberProvidedBloc<BlocA>(blocTag)?.let { b->
+    rememberBlocProvided<BlocA>(blocTag)?.let { b->
         BlocSelectorForAbstractSelector(b, selector, content)
     }
 }

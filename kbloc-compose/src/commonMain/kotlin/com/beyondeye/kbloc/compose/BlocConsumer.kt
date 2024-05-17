@@ -20,7 +20,7 @@ public inline fun <reified BlocA: BlocBase<BlocAState>,BlocAState:Any> BlocConsu
     crossinline listener: @DisallowComposableCalls suspend (BlocAState) -> Unit,
     crossinline content:@Composable (BlocAState)->Unit)
 {
-    rememberProvidedBloc<BlocA>(blocTag)?.let { b->
+    rememberBlocProvided<BlocA>(blocTag)?.let { b->
         BlocConsumerCore(b, listenWhen, listener, buildWhen, content)
     }
 }

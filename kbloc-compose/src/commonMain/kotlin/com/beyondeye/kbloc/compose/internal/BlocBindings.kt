@@ -88,6 +88,11 @@ internal fun <B:BlocBase<*>>rememberSaveableBlocBindingsWithAddedBlocs(
 }
 
 
+/**
+ * bloc bindings at the current point of the composition tree: bind the tag+ class name of the bloc the actual full
+ * bloc key (including for example screen name of the screen where the bloc was declared with blocproviders) to be used
+ * to retrieve the bloc from local blocStore
+ */
 @PublishedApi
 internal val LocalBlocBindings: ProvidableCompositionLocal<BlocBindings> = staticCompositionLocalOf { BlocBindings() }
 

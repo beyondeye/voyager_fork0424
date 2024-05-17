@@ -62,7 +62,7 @@ public inline fun <reified BlocA:BlocBase<BlocAState>,BlocAState:Any> BlocBuilde
     noinline buildWhen: BlocBuilderCondition<BlocAState>?=null,
     content:@Composable (BlocAState)->Unit)
 {
-    rememberProvidedBloc<BlocA>(blocTag)?.let { b->
+    rememberBlocProvided<BlocA>(blocTag)?.let { b->
         BlockBuilderCore(b, buildWhen, content)
     }
 
@@ -80,7 +80,7 @@ public  fun <BlocA:BlocBase<BlocAState>,BlocAState:Any> BlocA.collectAsState(): 
  * same as previous method but with explicitely specified bloc instance [externallyProvidedBlock]
  * not retrieved implicitely from current registered blocs in the current composable subtree
  * see [BlocProvider]
- * Use this method if for example you have retrieved the Bloc already with [rememberProvidedBloc]
+ * Use this method if for example you have retrieved the Bloc already with [rememberBlocProvided]
  * WARNING: NEED TO SPECIFY TEMPLATE PARAMETERS (BlocA type parameter) EXPLICITLY OTHERWISE BLOC WILL NOT BE RESOLVED!!
  */
 @Composable

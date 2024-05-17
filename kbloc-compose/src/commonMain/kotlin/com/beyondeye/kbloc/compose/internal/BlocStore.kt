@@ -62,6 +62,7 @@ public class BlocStore {
         var b = blocs.value.get(key)
         if (b != null) return b
         b = factory(cscope)
+        b.blocKey=key //store the full bloc key in the bloc
         blocs.update { it.put(key, b) }
         return b
     }
@@ -311,7 +312,7 @@ public fun DefineNewBlocStoreForSubTree(content_subtree: @Composable () -> Unit)
  */
 @Composable
 @PublishedApi
-internal inline fun <reified T : BlocBase<*>> Screen.rememberBloc(
+internal inline fun <reified T : BlocBase<*>> Screen.rememberNewBlocForScreen(
     tag: String? = null,
     crossinline factory: @DisallowComposableCalls (cscope: CoroutineScope) -> T,
     dispatcher: CoroutineDispatcher? = null

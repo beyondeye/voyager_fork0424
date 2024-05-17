@@ -9,7 +9,7 @@ import com.beyondeye.kbloc.compose.internal.BlocStore.Companion.buildBlocBinding
 import com.beyondeye.kbloc.compose.internal.BlocStore.Companion.getBlocKeyForUnboundBloc
 import com.beyondeye.kbloc.compose.internal.LocalBlocBindings
 import com.beyondeye.kbloc.compose.internal.LocalBlocStoreOwner
-import com.beyondeye.kbloc.compose.internal.rememberBloc
+import com.beyondeye.kbloc.compose.internal.rememberNewBlocForScreen
 import com.beyondeye.kbloc.core.Bloc
 import com.beyondeye.kbloc.core.BlocBase
 import kotlinx.coroutines.CoroutineScope
@@ -17,7 +17,7 @@ import kotlinx.coroutines.CoroutineScope
 /**
  *  [BlocProvider] is a composable which provides a [Bloc] to its child composable [content] and
  *  all the associated composable tree.
- *  The bloc can be retrieved  by calls to [rememberProvidedBloc]
+ *  The bloc can be retrieved  by calls to [rememberBlocProvided]
  *  It is used as a dependency injection (DI) configuration so that a single instance
  *  of a [Bloc] can be provided to multiple child composables within a subtree.
  *  BlocProvider is defined as an extension method of [Screen] because the lifecycle of the provided [Bloc]
@@ -44,7 +44,7 @@ public inline fun <reified BlocA: BlocBase<*>> Screen.BlocProviderForTag(
     crossinline create: @DisallowComposableCalls (cscope: CoroutineScope) -> BlocA,
     crossinline content:@Composable ()->Unit)
 {
-    val (b,bkey)=rememberBloc(blocTag,create)
+    val (b,bkey)=rememberNewBlocForScreen(blocTag,create)
     BindBloc(b,blocTag,bkey) {
         content()
     }
@@ -117,12 +117,26 @@ public inline fun <reified BlocA: BlocBase<*>> BlocProviderExt(
  */
 @Composable
 public inline fun <reified BlocA: BlocBase<*>>
-        rememberProvidedBloc(blocTag:String?=null):BlocA?
+        rememberBlocProvided(blocTag:String?=null):BlocA?
 {
     val curBindings=LocalBlocBindings.current
     val store = LocalBlocStoreOwner.current.blocStore
-    return remember(curBindings) { //recalculate if curBindings change
+    return remember(curBindings) { //recalculate if curBindings change (the actual available blocs at this point in the composition)
         val bkey=curBindings.bindingMaps[buildBlocBindingKey<BlocA>(blocTag)]
         store.blocs.value.get(bkey) as BlocA?
+    }
+}
+
+/**
+ * retrieve a bloc from the general bloc store (usually associated with an activity or similar top level UI component
+ * the blocKey is the value of [BlocBase.blocKey] that is assigned at bloc creation
+ */
+@Composable
+public inline fun <reified BlocA: BlocBase<*>>
+        rememberBlocProvidedForKey(blocKey:String):BlocA?
+{
+    val store = LocalBlocStoreOwner.current.blocStore
+    return remember { //recalculate if curBindings change (the actual available blocs at this point in the composition)
+        store.blocs.value.get(blocKey) as BlocA?
     }
 }

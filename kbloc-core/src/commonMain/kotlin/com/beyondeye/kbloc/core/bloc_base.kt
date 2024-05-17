@@ -99,6 +99,13 @@ public abstract class BlocBase<State : Any>// ignore: invalid_use_of_protected_m
      */
     public val cscope: CoroutineScope, useReferenceEqualityForStateChanges: Boolean
 ) : StateStreamableSource<State>, Emittable<State>, ErrorSink {
+    /**
+     * full bloc key, assigned when bloc created: used to retrieve the bloc from bloc store:
+     * normally this is not needed, except for cases where a bloc is shared among multiple screens
+     */
+    public var blocKey: String? =null
+//        internal set
+
     @PublishedApi
     internal var _emitted: Boolean = false
 

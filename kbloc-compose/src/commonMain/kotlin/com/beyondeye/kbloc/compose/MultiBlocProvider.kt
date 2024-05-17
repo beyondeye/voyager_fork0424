@@ -6,7 +6,7 @@ import androidx.compose.runtime.remember
 import cafe.adriel.voyager.core.screen.Screen
 import com.beyondeye.kbloc.compose.internal.BindBlocs
 import com.beyondeye.kbloc.compose.internal.BlocStore
-import com.beyondeye.kbloc.compose.internal.rememberBloc
+import com.beyondeye.kbloc.compose.internal.rememberNewBlocForScreen
 import com.beyondeye.kbloc.core.BlocBase
 import kotlinx.coroutines.CoroutineScope
 
@@ -42,7 +42,7 @@ public class _BlocProviderList(public val screen: Screen, public val blist:Mutab
         crossinline create: @DisallowComposableCalls (cscope: CoroutineScope) -> BlocA
     )    : _BlocProviderList
     {
-        val (b,bkey)=screen.rememberBloc(blocTag,create)
+        val (b,bkey)=screen.rememberNewBlocForScreen(blocTag,create)
         blist.add(Triple(b,blocTag?:"",bkey))
         return this
     }
