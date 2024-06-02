@@ -5,6 +5,7 @@ import com.beyondeye.kbloc.compose.lifecycle.mp_collectAsStateWithLifecycle
 import com.beyondeye.kbloc.core.Bloc
 import com.beyondeye.kbloc.core.BlocBase
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.transform
 
 
@@ -75,6 +76,15 @@ public inline fun <reified BlocA:BlocBase<BlocAState>,BlocAState:Any> BlocBuilde
 public  fun <BlocA:BlocBase<BlocAState>,BlocAState:Any> BlocA.collectAsState(): State<BlocAState> {
         return this.stream.mp_collectAsStateWithLifecycle(this.state)
 }
+
+/**
+ * similar to previous method but allow for remapping or selecting fields in block state
+ */
+@Composable
+public  fun <BlocA: BlocBase<BlocAState>,BlocAState:Any,Remapped> BlocA.collectAsState(mapper:BlocAState.()->Remapped): State<Remapped> {
+    return this.stream.map {it.mapper()  }.mp_collectAsStateWithLifecycle(this.state.mapper())
+}
+
 
 /**
  * same as previous method but with explicitely specified bloc instance [externallyProvidedBlock]
