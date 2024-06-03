@@ -49,6 +49,8 @@ public fun NavigatorB(
  * Navigator with support for automatic removal of [Bloc]s associated to a specific screen
  * when the screen is removed from the screen stack.
  * see https://voyager.adriel.cafe/lifecycle#screendisposable-for-all-screens
+ * TODO: this is probably obsolete: I have instead added the option resetOnScreenStart to
+ *       BlocProvider (resetOnScreenStart flag)
  */
 @Composable
 public fun NavigatorB(
@@ -64,6 +66,8 @@ public fun NavigatorB(
         onBackPressed,
         key
     ) { navigator ->
+        // instead of navigatorb define something different?? also I don't necessarily want all blocs to be automatically
+        // disposed when associated screen is disposed
         val bso = LocalBlocStoreOwner.current
         remember(navigator.lastItem) {
             // add handler that whenever last screen changes, add onDispose handler for it

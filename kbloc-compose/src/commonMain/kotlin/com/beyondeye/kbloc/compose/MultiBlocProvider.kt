@@ -10,21 +10,12 @@ import com.beyondeye.kbloc.compose.internal.rememberNewBlocForScreen
 import com.beyondeye.kbloc.core.BlocBase
 import kotlinx.coroutines.CoroutineScope
 
-
 /**
  * define multiple bloc providers to make multiple Blocs available to some composable subtree
  * The syntax for defining the list is as follows:
- * MultiBlocProvider.BlocProvider { scope -> BlocA() }.BlocProvider { scope -> BlocB() }.forContent { content() }
+ * BlocProviders().BlocProvider { scope -> BlocA() }.BlocProvider { scope -> BlocB() }.forContent { content() }
  * where content() is a composable function() for which we want the blocs made available
  * Any number of BlocProvider definitions is supported
- */
-@Composable
-public fun Screen.MultiBlocProvider():_BlocProviderList {
-    return _BlocProviderList(this)
-}
-
-/**
- * same as [MultiBlocProvider]
  */
 @Composable
 public fun Screen.BlocProviders():_BlocProviderList {
@@ -34,15 +25,18 @@ public fun Screen.BlocProviders():_BlocProviderList {
 
 /**
  * [blist] is a list of triples (Bloc:BlocBase<*>,bloc_tag:String,bloc_key:String)
+ * if [resetOnScreenStart] is True then recreate bloc when entering (navigating to) the screen
+ *                   otherwise bloc content is persistent between screens
  */
 public class _BlocProviderList(public val screen: Screen, public val blist:MutableList<Triple<BlocBase<*>,String,String>> = mutableListOf()) {
     @Composable
     public inline fun <reified BlocA: BlocBase<*>> BlocProvider(
         blocTag: String? = null,
+        resetOnScreenStart:Boolean=false,
         crossinline create: @DisallowComposableCalls (cscope: CoroutineScope) -> BlocA
     )    : _BlocProviderList
     {
-        val (b,bkey)=screen.rememberNewBlocForScreen(blocTag,create)
+        val (b,bkey)=screen.rememberNewBlocForScreen(blocTag,resetOnScreenStart,create)
         blist.add(Triple(b,blocTag?:"",bkey))
         return this
     }

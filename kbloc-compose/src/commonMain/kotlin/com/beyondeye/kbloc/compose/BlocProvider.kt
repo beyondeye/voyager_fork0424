@@ -37,14 +37,17 @@ import kotlinx.coroutines.CoroutineScope
  *
  *   NOTE: in the original flutter_bloc implementation there is an option to create the provided
  *         bloc lazily. There is currently no such option in this implementation
+ * if [resetOnScreenStart] is True then recreate bloc when entering (navigating to) the screen
+ *                   otherwise bloc content is persistent between screens
  */
 @Composable
 public inline fun <reified BlocA: BlocBase<*>> Screen.BlocProviderForTag(
     blocTag: String?,
+    resetOnScreenStart:Boolean=false,
     crossinline create: @DisallowComposableCalls (cscope: CoroutineScope) -> BlocA,
     crossinline content:@Composable ()->Unit)
 {
-    val (b,bkey)=rememberNewBlocForScreen(blocTag,create)
+    val (b,bkey)=rememberNewBlocForScreen(blocTag,resetOnScreenStart,create)
     BindBloc(b,blocTag,bkey) {
         content()
     }
@@ -54,13 +57,16 @@ public inline fun <reified BlocA: BlocBase<*>> Screen.BlocProviderForTag(
  * separate method for the most common case where no tag is provided. see [BlocProviderForTag]
  * we have a separate method because otherwise kotlin syntax requires that we  specify blocTag even if we define for it
  * a default value of null
+ * if [resetOnScreenStart] is True then recreate bloc when entering (navigating to) the screen
+ *                   otherwise bloc content is persistent between screens
  */
 @Composable
 public inline fun <reified BlocA : BlocBase<*>> Screen.BlocProvider(
     crossinline create: @DisallowComposableCalls (cscope: CoroutineScope) -> BlocA,
+    resetOnScreenStart: Boolean=false,
     crossinline content: @Composable () -> Unit
 ) {
-    BlocProviderForTag<BlocA>(null, create, content)
+    BlocProviderForTag<BlocA>(null,resetOnScreenStart, create, content)
 }
 
 

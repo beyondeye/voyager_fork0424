@@ -1,7 +1,12 @@
 package com.beyondeye.kbloc.compose.internal
 
 import androidx.compose.runtime.*
+import cafe.adriel.voyager.core.concurrent.ThreadSafeMap
+import cafe.adriel.voyager.core.concurrent.ThreadSafeSet
+import cafe.adriel.voyager.core.lifecycle.ScreenDisposable
+import cafe.adriel.voyager.core.lifecycle.ScreenLifecycleStore
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.core.screen.ScreenKey
 //import com.beyondeye.kbloc.compose.navigator.Navigator
 import com.beyondeye.kbloc.core.BlocBase
 import com.beyondeye.kbloc.ext.getFullName
@@ -56,16 +61,27 @@ public class BlocStore {
     internal inline fun <reified T : BlocBase<*>> getOrPut(
         key: BlocKey,
         cscope: CoroutineScope,
-        crossinline factory: @DisallowComposableCalls (cscope: CoroutineScope) -> T
+        crossinline factory: @DisallowComposableCalls (cscope: CoroutineScope) -> T,
+        forceCreate:Boolean=false
     ): BlocBase<*> {
 //        val key = getBlocKey<T>(screen, tag)
         var b = blocs.value.get(key)
-        if (b != null) return b
+        if (b != null && !forceCreate) return b
         b = factory(cscope)
         b.blocKey=key //store the full bloc key in the bloc
         blocs.update { it.put(key, b) }
         return b
     }
+
+    //----------------------------------------------------------------
+    @PublishedApi
+    internal inline fun <reified T : BlocBase<*>> remove(key: BlocKey): BlocBase<*>? {
+//        val key = getBlocKey<T>(screen, tag)
+        val b = blocs.value.get(key) ?: return null
+        blocs.update { it.remove(key) }
+        return b
+    }
+
 
 //    /**
 //     * put an UNBOUND bloc in the bloc store: an unbound bloc is a bloc not associated to a screen
@@ -306,14 +322,35 @@ public fun DefineNewBlocStoreForSubTree(content_subtree: @Composable () -> Unit)
      */
 }
 //-----------------------------------------------------------
+//the following code adapted from LifecycleEffectOnce code
+@PublishedApi
+internal object ExecutedBlocResetAtStartOfScreenStore : ScreenDisposable {
+    private val executedBlocReset = ThreadSafeMap<ScreenKey, ThreadSafeSet<String>>()
+
+    fun storeExecutedResetBlocKey(screen: Screen, blocKey: String) {
+        val set = executedBlocReset.getOrPut(screen.key) { ThreadSafeSet() }
+        set.add(blocKey)
+    }
+
+    fun hasExecutedResetBlocKey(screen: Screen, blocKey: String): Boolean =
+        executedBlocReset.get(screen.key)?.contains(blocKey) == true
+
+    override fun onDispose(screen: Screen) {
+        executedBlocReset.remove(screen.key)
+    }
+}
+
 /**
  * @param factory is a builder method for the [Bloc] or [Cubit], it takes a [CoroutineScope]
  * parameter because it is needed for building any [Bloc]
+ * if [resetOnScreenStart] is True then recreate bloc when entering (navigating to) the screen
+ *                   otherwise bloc content is persistent between screens
  */
 @Composable
 @PublishedApi
 internal inline fun <reified T : BlocBase<*>> Screen.rememberNewBlocForScreen(
     tag: String? = null,
+    resetOnScreenStart:Boolean=false,
     crossinline factory: @DisallowComposableCalls (cscope: CoroutineScope) -> T,
     dispatcher: CoroutineDispatcher? = null
 ): Pair<T, String> {
@@ -326,8 +363,21 @@ internal inline fun <reified T : BlocBase<*>> Screen.rememberNewBlocForScreen(
     // since we store it inside the bloc itself
     var cscope = MainScope() + Dispatchers.Default + CoroutineName(bkey)
     if (dispatcher != null) cscope += dispatcher
+
+    val executedBlocResetScreenStore = remember {
+        ScreenLifecycleStore.get(this) { ExecutedBlocResetAtStartOfScreenStore }
+    }
+
     val b = remember(bkey) {
-        store.getOrPut(bkey, cscope, factory) as T
+        var forceCreate=false
+        if (resetOnScreenStart && !executedBlocResetScreenStore.hasExecutedResetBlocKey(this@rememberNewBlocForScreen, bkey)) {
+            executedBlocResetScreenStore.storeExecutedResetBlocKey(this@rememberNewBlocForScreen, bkey)
+            forceCreate=true
+        }
+
+        //Timber() add here logging to understand when exactly this is called and bloc is
+        // recreated
+        store.getOrPut(bkey, cscope, factory,forceCreate) as T
     }
     return Pair(b, bkey)
 }
