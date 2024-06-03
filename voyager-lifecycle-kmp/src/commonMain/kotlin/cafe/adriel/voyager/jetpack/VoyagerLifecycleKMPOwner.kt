@@ -1,10 +1,6 @@
-package cafe.adriel.voyager.androidx
+package cafe.adriel.voyager.jetpack
 
-import android.app.Application
-import android.content.Context
-import android.os.Bundle
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.ProvidedValue
 import androidx.compose.runtime.getValue
@@ -12,19 +8,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.platform.LocalSavedStateRegistryOwner
+import androidx.core.bundle.Bundle
+import androidx.lifecycle.AtomicReference
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.HasDefaultViewModelProviderFactory
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.SAVED_STATE_REGISTRY_OWNER_KEY
-import androidx.lifecycle.SavedStateViewModelFactory
 import androidx.lifecycle.VIEW_MODEL_STORE_OWNER_KEY
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.enableSavedStateHandles
@@ -34,13 +28,23 @@ import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
-import cafe.adriel.voyager.core.lifecycle.ScreenLifecycleOwner
-import cafe.adriel.voyager.core.lifecycle.ScreenLifecycleStore
-import cafe.adriel.voyager.core.screen.Screen
-import java.util.concurrent.atomic.AtomicReference
+import cafe.adriel.voyager.core.annotation.ExperimentalVoyagerApi
+import cafe.adriel.voyager.core.annotation.InternalVoyagerApi
 
-public class AndroidScreenLifecycleOwner private constructor() :
-    ScreenLifecycleOwner,
+internal expect class SavedStateViewModelPlatform constructor(owner: SavedStateRegistryOwner) {
+    fun getDefaultViewModelProviderFactory(): ViewModelProvider.Factory
+
+    fun providePlatform(extras: MutableCreationExtras)
+
+    @Composable
+    fun initHooks()
+
+    fun provideHooks(): List<ProvidedValue<*>>
+}
+
+@ExperimentalVoyagerApi
+@InternalVoyagerApi
+public class VoyagerLifecycleKMPOwner :
     LifecycleOwner,
     ViewModelStoreOwner,
     SavedStateRegistryOwner,
@@ -50,10 +54,11 @@ public class AndroidScreenLifecycleOwner private constructor() :
 
     override val viewModelStore: ViewModelStore = ViewModelStore()
 
-    private val atomicAppContext = AtomicReference<Context>()
-    internal val atomicParentLifecycleOwner = AtomicReference<LifecycleOwner>()
+    internal val atomicParentLifecycleOwner = AtomicReference<LifecycleOwner?>(null)
 
     private val controller = SavedStateRegistryController.create(this)
+
+    private val platformSavedState = SavedStateViewModelPlatform(this)
 
     private var isCreated: Boolean by mutableStateOf(false)
 
@@ -61,19 +66,13 @@ public class AndroidScreenLifecycleOwner private constructor() :
         get() = controller.savedStateRegistry
 
     override val defaultViewModelProviderFactory: ViewModelProvider.Factory
-        get() = SavedStateViewModelFactory(
-            application = atomicAppContext.get()?.getApplication(),
-            owner = this
-        )
+        get() = platformSavedState.getDefaultViewModelProviderFactory()
 
     override val defaultViewModelCreationExtras: CreationExtras
         get() = MutableCreationExtras().apply {
-            val application = atomicAppContext.get()?.getApplication()
-            if (application != null) {
-                set(AndroidViewModelFactory.APPLICATION_KEY, application)
-            }
-            set(SAVED_STATE_REGISTRY_OWNER_KEY, this@AndroidScreenLifecycleOwner)
-            set(VIEW_MODEL_STORE_OWNER_KEY, this@AndroidScreenLifecycleOwner)
+            platformSavedState.providePlatform(this)
+            set(SAVED_STATE_REGISTRY_OWNER_KEY, this@VoyagerLifecycleKMPOwner)
+            set(VIEW_MODEL_STORE_OWNER_KEY, this@VoyagerLifecycleKMPOwner)
 
             /* TODO if (getArguments() != null) {
                 extras.set<Bundle>(DEFAULT_ARGS_KEY, getArguments())
@@ -106,23 +105,7 @@ public class AndroidScreenLifecycleOwner private constructor() :
         }
     }
 
-    @Composable
-    override fun ProvideBeforeScreenContent(
-        provideSaveableState: @Composable (suffixKey: String, content: @Composable () -> Unit) -> Unit,
-        content: @Composable () -> Unit
-    ) {
-        provideSaveableState("lifecycle") {
-            LifecycleDisposableEffect()
-
-            val hooks = getHooks()
-
-            CompositionLocalProvider(*hooks.toTypedArray()) {
-                content()
-            }
-        }
-    }
-
-    override fun onDispose(screen: Screen) {
+    public fun onDispose() {
         viewModelStore.clear()
         disposeEvents.forEach { event ->
             lifecycle.safeHandleLifecycleEvent(event)
@@ -134,15 +117,15 @@ public class AndroidScreenLifecycleOwner private constructor() :
     }
 
     @Composable
-    private fun getHooks(): List<ProvidedValue<*>> {
-        atomicAppContext.compareAndSet(null, LocalContext.current.applicationContext)
+    internal fun getHooks(): List<ProvidedValue<*>> {
+        platformSavedState.initHooks()
         atomicParentLifecycleOwner.compareAndSet(null, LocalLifecycleOwner.current)
 
         return remember(this) {
             listOf(
                 LocalLifecycleOwner provides this,
                 LocalViewModelStoreOwner provides this,
-                LocalSavedStateRegistryOwner provides this
+                *platformSavedState.provideHooks().toTypedArray()
             )
         }
     }
@@ -183,7 +166,7 @@ public class AndroidScreenLifecycleOwner private constructor() :
     }
 
     @Composable
-    private fun LifecycleDisposableEffect() {
+    internal fun LifecycleDisposableEffect() {
         val savedState = rememberSaveable { Bundle() }
         if (!isCreated) {
             onCreate(savedState) // do this in the UI thread to force it to be called before anything else
@@ -203,11 +186,6 @@ public class AndroidScreenLifecycleOwner private constructor() :
                 emitOnStopEvents()
             }
         }
-    }
-
-    private fun Context.getApplication(): Application? = when (this) {
-        is Application -> this
-        else -> null
     }
 
     private fun LifecycleRegistry.safeHandleLifecycleEvent(event: Lifecycle.Event) {
@@ -236,9 +214,5 @@ public class AndroidScreenLifecycleOwner private constructor() :
         private val disposeEvents = arrayOf(
             Lifecycle.Event.ON_DESTROY
         )
-
-        public fun get(screen: Screen): ScreenLifecycleOwner {
-            return ScreenLifecycleStore.get(screen) { AndroidScreenLifecycleOwner() }
-        }
     }
 }
