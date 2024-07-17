@@ -350,7 +350,7 @@ internal object ExecutedBlocResetAtStartOfScreenStore : ScreenDisposable {
 @PublishedApi
 internal inline fun <reified T : BlocBase<*>> Screen.rememberNewBlocForScreen(
     tag: String? = null,
-    resetOnScreenStart:Boolean=false,
+    resetOnScreenStart:Boolean=true,
     crossinline factory: @DisallowComposableCalls (cscope: CoroutineScope) -> T,
     dispatcher: CoroutineDispatcher? = null
 ): Pair<T, String> {

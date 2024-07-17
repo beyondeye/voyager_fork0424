@@ -32,7 +32,7 @@ public class _BlocProviderList(public val screen: Screen, public val blist:Mutab
     @Composable
     public inline fun <reified BlocA: BlocBase<*>> BlocProvider(
         blocTag: String? = null,
-        resetOnScreenStart:Boolean=false,
+        resetOnScreenStart:Boolean=true,
         crossinline create: @DisallowComposableCalls (cscope: CoroutineScope) -> BlocA
     )    : _BlocProviderList
     {

@@ -43,7 +43,7 @@ import kotlinx.coroutines.CoroutineScope
 @Composable
 public inline fun <reified BlocA: BlocBase<*>> Screen.BlocProviderForTag(
     blocTag: String?,
-    resetOnScreenStart:Boolean=false,
+    resetOnScreenStart:Boolean=true,
     crossinline create: @DisallowComposableCalls (cscope: CoroutineScope) -> BlocA,
     crossinline content:@Composable ()->Unit)
 {
@@ -63,7 +63,7 @@ public inline fun <reified BlocA: BlocBase<*>> Screen.BlocProviderForTag(
 @Composable
 public inline fun <reified BlocA : BlocBase<*>> Screen.BlocProvider(
     crossinline create: @DisallowComposableCalls (cscope: CoroutineScope) -> BlocA,
-    resetOnScreenStart: Boolean=false,
+    resetOnScreenStart: Boolean=true,
     crossinline content: @Composable () -> Unit
 ) {
     BlocProviderForTag<BlocA>(null,resetOnScreenStart, create, content)
