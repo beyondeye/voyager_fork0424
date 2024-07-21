@@ -40,6 +40,27 @@ public fun Screen.LifecycleEffectOnce(onFirstAppear: () -> Unit) {
     }
 }
 
+/**
+ * *DARIO* allow to rerun effect if [key1] is changed
+ */
+@ExperimentalVoyagerApi
+@Composable
+public fun Screen.LifecycleEffectOnce(key1:Any?, onFirstAppear: () -> Unit) {
+    val uniqueCompositionKey = rememberSaveable(key1) { randomUuid() }
+
+    val lifecycleEffectStore = remember {
+        ScreenLifecycleStore.get(this) { LifecycleEffectStore }
+    }
+
+    LaunchedEffect(key1) {
+        if (lifecycleEffectStore.hasExecuted(this@LifecycleEffectOnce, uniqueCompositionKey).not()) {
+            lifecycleEffectStore.store(this@LifecycleEffectOnce, uniqueCompositionKey)
+            onFirstAppear()
+        }
+    }
+}
+
+
 @Composable
 public fun rememberScreenLifecycleOwner(
     screen: Screen
