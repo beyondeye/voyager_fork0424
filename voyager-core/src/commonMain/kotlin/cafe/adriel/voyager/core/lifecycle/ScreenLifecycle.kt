@@ -24,8 +24,21 @@ public fun Screen.LifecycleEffect(
 }
 
 @ExperimentalVoyagerApi
+public data class LifecycleEffectOnceScope(
+    val uniqueKey: String,
+    val registerOrderIndex: Int
+) {
+    internal var onDisposed: (() -> Unit)? = null
+
+    @ExperimentalVoyagerApi
+    public fun onDispose(onDisposed: () -> Unit) {
+        this.onDisposed = onDisposed
+    }
+}
+
+@ExperimentalVoyagerApi
 @Composable
-public fun Screen.LifecycleEffectOnce(onFirstAppear: () -> Unit) {
+public fun Screen.LifecycleEffectOnce(onFirstAppear: LifecycleEffectOnceScope.() -> Unit) {
     val uniqueCompositionKey = rememberSaveable { randomUuid() }
 
     val lifecycleEffectStore = remember {
@@ -34,8 +47,8 @@ public fun Screen.LifecycleEffectOnce(onFirstAppear: () -> Unit) {
 
     LaunchedEffect(Unit) {
         if (lifecycleEffectStore.hasExecuted(this@LifecycleEffectOnce, uniqueCompositionKey).not()) {
-            lifecycleEffectStore.store(this@LifecycleEffectOnce, uniqueCompositionKey)
-            onFirstAppear()
+            val scope = lifecycleEffectStore.store(this@LifecycleEffectOnce, uniqueCompositionKey)
+            onFirstAppear(scope)
         }
     }
 }
@@ -45,7 +58,7 @@ public fun Screen.LifecycleEffectOnce(onFirstAppear: () -> Unit) {
  */
 @ExperimentalVoyagerApi
 @Composable
-public fun Screen.LifecycleEffectOnce(key1:Any?, onFirstAppear: () -> Unit) {
+public fun Screen.LifecycleEffectOnce(key1:Any?,onFirstAppear: LifecycleEffectOnceScope.() -> Unit) {
     val uniqueCompositionKey = rememberSaveable(key1) { randomUuid() }
 
     val lifecycleEffectStore = remember {
@@ -54,8 +67,8 @@ public fun Screen.LifecycleEffectOnce(key1:Any?, onFirstAppear: () -> Unit) {
 
     LaunchedEffect(key1) {
         if (lifecycleEffectStore.hasExecuted(this@LifecycleEffectOnce, uniqueCompositionKey).not()) {
-            lifecycleEffectStore.store(this@LifecycleEffectOnce, uniqueCompositionKey)
-            onFirstAppear()
+            val scope = lifecycleEffectStore.store(this@LifecycleEffectOnce, uniqueCompositionKey)
+            onFirstAppear(scope)
         }
     }
 }

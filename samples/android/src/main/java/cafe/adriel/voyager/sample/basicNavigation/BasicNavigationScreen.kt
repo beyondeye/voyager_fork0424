@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.lifecycle.LifecycleEffect
+import cafe.adriel.voyager.core.lifecycle.LifecycleEffectOnce
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -36,6 +37,12 @@ data class BasicNavigationScreen(
             onStarted = { Log.d("Navigator", "Start screen #$index") },
             onDisposed = { Log.d("Navigator", "Dispose screen #$index") }
         )
+        LifecycleEffectOnce {
+            Log.d("Navigator", "On screen first appear #$index")
+            onDispose {
+                Log.d("Navigator", "On screen dispose")
+            }
+        }
 
         val navigator = LocalNavigator.currentOrThrow
 
