@@ -27,7 +27,7 @@ private fun BaseExtension.setupAndroid() {
         targetSdk = 34
 
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.11" //dario changed version
     }
 }
 
